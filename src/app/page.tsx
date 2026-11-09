@@ -1,20 +1,43 @@
+import EventSection from '@/components/events/EventSection';
+import HeroCarousel from '@/components/home/HeroCarousel';
+import {
+  getFeaturedEvents,
+  getLastSpotsEvents,
+  getRecentlyAddedEvents,
+  getUpcomingEvents,
+} from '@/data/events';
+
 export default function HomePage() {
   return (
-    <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Bienvenido a la Plataforma</h1>
-      <p className="text-gray-600 leading-relaxed mb-6">
-        Esta es la vista principal montada dinámicamente dentro de la sección principal.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 border rounded-lg bg-blue-50/50">
-          <h2 className="font-semibold text-blue-900 mb-1">Módulo Rápido A</h2>
-          <p className="text-sm text-blue-700">Contenido o tarjetas de presentación.</p>
-        </div>
-        <div className="p-4 border rounded-lg bg-emerald-50/50">
-          <h2 className="font-semibold text-emerald-900 mb-1">Módulo Rápido B</h2>
-          <p className="text-sm text-emerald-700">Estadísticas o accesos directos.</p>
-        </div>
-      </div>
+    <div className="space-y-14 pb-4">
+      <HeroCarousel events={getFeaturedEvents()} />
+
+      <EventSection
+        id="proximos-eventos"
+        eyebrow="Agenda"
+        title="Próximos eventos"
+        description="Las actividades que están por comenzar. Reserva tu lugar y no te pierdas nada de la agenda universitaria."
+        events={getUpcomingEvents(3)}
+        accent="blue"
+      />
+
+      <EventSection
+        id="eventos-anadidos"
+        eyebrow="Novedades"
+        title="Eventos añadidos"
+        description="Recién publicados por la comunidad universitaria: talleres, conciertos, competencias y más."
+        events={getRecentlyAddedEvents(3)}
+        accent="emerald"
+      />
+
+      <EventSection
+        id="ultimos-cupos"
+        eyebrow="No te quedes fuera"
+        title="Últimos cupos"
+        description="Eventos con disponibilidad limitada. Si te interesan, asegura tu lugar antes de que se agoten."
+        events={getLastSpotsEvents(3)}
+        accent="rose"
+      />
     </div>
   );
 }
