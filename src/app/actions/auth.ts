@@ -3,30 +3,36 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { createClient } from '@/utils/supabase/server';
-import {
-  getHomeForRole,
-  getRouteRule,
-  isValidRole,
-  LOGIN_PORTALS,
-  type LoginPortal,
-  type Role,
-} from '@/config/permissions';
+import { getHomeForRole, getRouteRule, type Role } from '@/config/permissions';
+import { resolvePerfil } from '@/lib/auth/perfil';
 import type { AuthState, RegisterState } from '@/types/auth';
+import { createClient } from '@/utils/supabase/server';
 
 /** Solo se aceptan rutas relativas y permitidas para el rol autenticado. */
 function safeNext(next: string, rol: Role): string | null {
-  if (!next.startsWith('/') || next.startsWith('//')) return null;
+  if (!next.startsWith('/') || next.startsWith('//') || next.startsWith('\\')) {
+    return null;
+  }
   const pathname = next.split('?')[0];
   const rule = getRouteRule(pathname);
   if (!rule || !rule.roles.includes(rol)) return null;
   return next;
 }
 
+function loginError(message: string): string {
+  if (/invalid login credentials|invalid email or password/i.test(message)) {
+    return 'Correo o contraseña incorrectos.';
+  }
+  if (/email not confirmed/i.test(message)) {
+    return 'Confirma tu correo antes de iniciar sesión.';
+  }
+  return 'No fue posible iniciar sesión. Intenta de nuevo.';
+}
+
 async function authenticate(
   _state: AuthState,
   formData: FormData,
-  portal: LoginPortal,
+  portal: 'asistente' | 'equipo',
 ): Promise<AuthState> {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
@@ -45,32 +51,38 @@ async function authenticate(
   });
 
   if (error || !data.user) {
-    return { error: 'Correo o contraseña incorrectos.' };
+    return { error: loginError(error?.message ?? '') };
   }
 
-  const { data: perfil, error: perfilError } = await supabase
-    .from('perfiles')
-    .select('rol')
-    .eq('id', data.user.id)
-    .maybeSingle();
-
-  if (perfilError) {
+  let perfil;
+  try {
+    perfil = await resolvePerfil(supabase, data.user);
+  } catch (perfilError) {
+    console.error('[auth] No se pudo resolver el perfil:', perfilError);
     await supabase.auth.signOut();
     return { error: 'No fue posible verificar tu perfil. Intenta de nuevo.' };
   }
 
-  const rol: Role = perfil && isValidRole(perfil.rol) ? perfil.rol : 'asistente';
-
-  // Credenciales válidas pero rol equivocado: se cierra la sesión creada para
-  // que no quede activa ninguna cookie del portal equivocado.
-  if (!LOGIN_PORTALS[portal].roles.includes(rol)) {
-    await supabase.auth.signOut();
-    return {
-      error: `Esta cuenta no tiene acceso al portal de ${LOGIN_PORTALS[portal].label}.`,
-    };
+  if (portal === 'equipo') {
+    if (!perfil.equipo) {
+      await supabase.auth.signOut();
+      return { error: 'Esta cuenta no tiene acceso al equipo' };
+    }
+    const rol = perfil.equipo.rolInterno;
+    redirect(safeNext(next, rol) ?? getHomeForRole(rol));
   }
 
-  redirect(safeNext(next, rol) ?? getHomeForRole(rol));
+  if (!perfil.asistente) {
+    if (perfil.equipo) {
+      await supabase.auth.signOut();
+      return {
+        error: 'Esta cuenta pertenece al equipo. Usa el acceso de Equipo.',
+      };
+    }
+    redirect('/completar-perfil');
+  }
+
+  redirect(safeNext(next, 'asistente') ?? '/eventos');
 }
 
 export async function loginAsistente(
@@ -128,7 +140,6 @@ export async function registerAsistente(
     return { error: error.message };
   }
 
-  // Si la confirmación de correo está desactivada, Supabase ya creó la sesión.
   if (data.session) {
     redirect('/inicio');
   }

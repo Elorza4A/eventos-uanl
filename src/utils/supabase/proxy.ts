@@ -2,22 +2,23 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+import { getSupabaseConfig } from './env';
 
 /**
- * Cliente Supabase para Proxy. A diferencia del helper anterior, ejecuta
- * `auth.getUser()` desde el proxy para refrescar la sesión y propaga las
- * cookies tanto en la respuesta normal como en los redirects.
+ * Cliente Supabase para Proxy. Ejecuta `auth.getUser()` desde el proxy para
+ * refrescar la sesión y propaga las cookies tanto en respuestas normales como
+ * en redirects.
  */
 export function createClient(request: NextRequest) {
+  const { url, key } = getSupabaseConfig();
+
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
+  const supabase = createServerClient(url, key, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

@@ -70,11 +70,11 @@ export default function Navbar({ links, user }: Props) {
             </>
           ) : (
             <div className="flex items-center gap-3 text-xs font-medium">
-              <Link href="/login/asistente" className="text-white hover:underline">
+              <Link href="/login" className="text-white hover:underline">
                 Acceso asistentes
               </Link>
               <span className="text-white/40" aria-hidden="true">|</span>
-              <Link href="/login/equipo" className="text-white hover:underline">
+              <Link href="/equipo/login" className="text-white hover:underline">
                 Acceso equipo
               </Link>
             </div>
