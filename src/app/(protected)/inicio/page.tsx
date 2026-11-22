@@ -1,21 +1,22 @@
 import EventCard from '@/components/events/EventCard';
+import { ASSISTANT_ROLES } from '@/config/permissions';
 import { getUpcomingEvents } from '@/data/events';
 import { requireRole } from '@/lib/dal';
 
-export default async function MisEventosPage() {
-  const user = await requireRole(['asistente', 'admin'], '/login/asistente');
+export default async function InicioAsistentePage() {
+  const user = await requireRole(ASSISTANT_ROLES, '/login/asistente');
   const eventos = getUpcomingEvents(3);
 
   return (
     <div className="space-y-8">
       <header className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
-          Área de asistentes
+          Inicio · Asistentes
         </p>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">Mis eventos</h1>
+        <h1 className="mt-2 text-2xl font-bold text-gray-900">Hola, {user.nombre || user.email}</h1>
         <p className="mt-3 text-sm leading-relaxed text-gray-600">
-          Hola, {user.nombre || user.email}. Aquí encontrarás los próximos eventos
-          disponibles para ti.
+          Este es tu espacio. Aquí encontrarás los próximos eventos disponibles
+          para ti.
         </p>
       </header>
 

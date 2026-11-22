@@ -193,7 +193,7 @@ export default function HeroCarousel({ events }: { events: EventItem[] }) {
                       <span aria-hidden="true">→</span>
                     </Link>
                     <Link
-                      href="/mis-eventos"
+                      href="/inicio"
                       className="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                     >
                       Guardar en mis eventos

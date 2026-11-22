@@ -130,7 +130,7 @@ export async function registerAsistente(
 
   // Si la confirmación de correo está desactivada, Supabase ya creó la sesión.
   if (data.session) {
-    redirect('/mis-eventos');
+    redirect('/inicio');
   }
 
   return {

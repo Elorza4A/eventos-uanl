@@ -1,7 +1,8 @@
+import { STAFF_ROLES } from '@/config/permissions';
 import { requireRole } from '@/lib/dal';
 
-export default async function OrganizarPage() {
-  const user = await requireRole(['organizador', 'admin'], '/login/equipo');
+export default async function ListadoEventosPage() {
+  const user = await requireRole(STAFF_ROLES, '/login/equipo');
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
