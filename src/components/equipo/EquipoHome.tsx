@@ -1,14 +1,13 @@
 import Link from 'next/link';
 
-import { ROLE_LABELS, STAFF_ROLES } from '@/config/permissions';
-import { requireRole } from '@/lib/dal';
+import { ROLE_LABELS } from '@/config/permissions';
+import type { CurrentUser } from '@/lib/dal';
 
 const cardClassName =
   'block rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--color-primary)] hover:shadow-md';
 
-export default async function InicioEquipoPage() {
-  const user = await requireRole(STAFF_ROLES, '/login/equipo');
-
+/** Inicio compartido por administradores y organizadores. */
+export default function EquipoHome({ user }: { user: CurrentUser }) {
   return (
     <div className="space-y-8">
       <header className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
@@ -25,7 +24,7 @@ export default async function InicioEquipoPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <Link href="/listado-eventos" className={cardClassName}>
+        <Link href="/equipo/listado-eventos" className={cardClassName}>
           <span className="text-base font-semibold text-gray-900">
             Listado de eventos
           </span>
@@ -35,12 +34,10 @@ export default async function InicioEquipoPage() {
         </Link>
 
         {user.rol === 'admin' ? (
-          <Link href="/admin" className={cardClassName}>
-            <span className="text-base font-semibold text-gray-900">
-              Administración
-            </span>
+          <Link href="/equipo/usuarios" className={cardClassName}>
+            <span className="text-base font-semibold text-gray-900">Usuarios</span>
             <span className="mt-2 block text-sm text-gray-600">
-              Gestiona roles y la configuración general del sistema.
+              Gestiona las cuentas del equipo y sus roles.
             </span>
           </Link>
         ) : null}

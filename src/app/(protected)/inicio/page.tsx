@@ -4,7 +4,7 @@ import { getUpcomingEvents } from '@/data/events';
 import { requireRole } from '@/lib/dal';
 
 export default async function InicioAsistentePage() {
-  const user = await requireRole(ASSISTANT_ROLES, '/login/asistente');
+  const user = await requireRole(ASSISTANT_ROLES, '/login');
   const eventos = getUpcomingEvents(3);
 
   return (

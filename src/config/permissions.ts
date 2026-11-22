@@ -29,8 +29,6 @@ export const NAV_LINKS: readonly NavLink[] = [
   { name: 'Inicio', href: '/', roles: ALL_ROLES, alwaysVisible: true, home: true },
   { name: 'Eventos', href: '/eventos', roles: ALL_ROLES, alwaysVisible: true },
   { name: 'Mis eventos', href: '/inicio', roles: ASSISTANT_ROLES },
-  { name: 'Listado de eventos', href: '/listado-eventos', roles: STAFF_ROLES },
-  { name: 'Administración', href: '/admin', roles: ['admin'] },
 ];
 
 export type RouteRule = {
@@ -44,22 +42,37 @@ export const ROUTE_RULES: readonly RouteRule[] = [
   {
     pattern: /^\/inicio(?:\/|$)/,
     roles: ASSISTANT_ROLES,
-    loginPath: '/login/asistente',
+    loginPath: '/login',
   },
   {
-    pattern: /^\/equipo(?:\/|$)/,
+    pattern: /^\/eventos(?:\/|$)/,
+    roles: ASSISTANT_ROLES,
+    loginPath: '/login',
+  },
+  {
+    pattern: /^\/completar-perfil(?:\/|$)/,
+    roles: ALL_ROLES,
+    loginPath: '/login',
+  },
+  {
+    pattern: /^\/equipo\/usuarios(?:\/|$)/,
+    roles: ['admin'],
+    loginPath: '/equipo/login',
+  },
+  {
+    pattern: /^\/equipo(?:\/(?!login(?:\/|$))|$)/,
     roles: STAFF_ROLES,
-    loginPath: '/login/equipo',
+    loginPath: '/equipo/login',
   },
   {
     pattern: /^\/listado-eventos(?:\/|$)/,
     roles: STAFF_ROLES,
-    loginPath: '/login/equipo',
+    loginPath: '/equipo/login',
   },
   {
-    pattern: /^\/admin(?:\/|$)/,
-    roles: ['admin'],
-    loginPath: '/login/equipo',
+    pattern: /^\/organizador(?:\/|$)/,
+    roles: STAFF_ROLES,
+    loginPath: '/equipo/login',
   },
 ];
 
@@ -82,8 +95,8 @@ export function visibleLinks(role?: Role): NavLink[] {
 }
 
 export function getHomeForRole(role: Role): string {
-  if (role === 'asistente') return '/inicio';
-  return '/equipo/inicio';
+  if (role === 'admin' || role === 'organizador') return '/equipo';
+  return '/eventos';
 }
 
 export const LOGIN_PORTALS = {
