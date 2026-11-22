@@ -1,6 +1,4 @@
 import './globals.css';
-import Navbar from '@/components/layout/NavBar';
-import Footer from '@/components/layout/Footer';
 
 export const metadata = {
   title: 'Sistema Universitario',
@@ -11,12 +9,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className="flex min-h-screen flex-col bg-gray-50 text-gray-900 antialiased">
-        <Navbar />
-        {/* El contenido dinámico se monta dentro de este <main> */}
-        <main className="flex-1 max-w-6xl w-full mx-auto p-6">
-          {children}
-        </main>
-        <Footer />
+        {/* Cada grupo de rutas aporta su propio shell (AppShell o layout de acceso). */}
+        {children}
       </body>
     </html>
   );
