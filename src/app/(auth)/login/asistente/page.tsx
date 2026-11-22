@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-
 import { loginAsistente } from '@/app/actions/auth';
 import LoginForm from '@/components/auth/LoginForm';
 import { getHomeForRole } from '@/config/permissions';

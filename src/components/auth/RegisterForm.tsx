@@ -2,18 +2,95 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import { useForm } from '@tanstack/react-form';
+import { z } from 'zod';
 
 import { registerAsistente } from '@/app/actions/auth';
 import type { RegisterState } from '@/types/auth';
 
 const inputClassName =
   'mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-blue-500/20';
+const errorClassName =
+  'mt-1 text-sm text-rose-700';
+
+type RegisterFormValues = {
+  nombre: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  estado: string;
+  municipio: string;
+  facultad: string;
+  edad: string;
+  genero: string;
+};
+
+const nombreSchema = z
+  .string()
+  .trim()
+  .min(3, 'Ingresa tu nombre completo');
+const emailSchema = z
+  .string()
+  .trim()
+  .email('Ingresa un correo electrónico válido');
+const passwordSchema = z
+  .string()
+  .min(8, 'La contraseña debe tener al menos 8 caracteres');
+const edadSchema = z
+  .string()
+  .refine(
+    (value) =>
+      value === '' ||
+      (/^\d+$/.test(value) &&
+        Number(value) >= 0 &&
+        Number(value) <= 120),
+    'Ingresa una edad válida entre 0 y 120',
+  );
+
+function getFieldError(error: unknown) {
+  if (typeof error === 'string') return error;
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+  return 'Valor inválido';
+}
 
 export default function RegisterForm() {
   const [state, formAction, pending] = useActionState<RegisterState, FormData>(
     registerAsistente,
     {},
   );
+  const form = useForm({
+    defaultValues: {
+      nombre: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      estado: '',
+      municipio: '',
+      facultad: '',
+      edad: '',
+      genero: '',
+    } satisfies RegisterFormValues,
+    onSubmit: ({ value }) => {
+      const formData = new FormData();
+      formData.set('nombre', value.nombre);
+      formData.set('email', value.email);
+      formData.set('password', value.password);
+      formData.set('confirmPassword', value.confirmPassword);
+      formData.set('estado', value.estado);
+      formData.set('municipio', value.municipio);
+      formData.set('facultad', value.facultad);
+      formData.set('edad', value.edad);
+      formData.set('genero', value.genero);
+      formAction(formData);
+    },
+  });
 
   if (state.success) {
     return (
@@ -33,70 +110,271 @@ export default function RegisterForm() {
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-primary)]">
-        Nueva cuenta
+        Crea tu cuenta
       </p>
-      <h1 className="mt-1 text-2xl font-bold text-gray-900">Registro de asistentes</h1>
+      <h1 className="mt-1 text-2xl font-bold text-gray-900">Eventos UANL</h1>
       <p className="mt-2 text-sm leading-relaxed text-gray-600">
         Crea tu cuenta para inscribirte y consultar tus eventos.
       </p>
 
-      <form action={formAction} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="nombre" className="text-sm font-medium text-gray-800">
-            Nombre completo
-          </label>
-          <input
-            id="nombre"
-            name="nombre"
-            type="text"
-            autoComplete="name"
-            required
-            className={inputClassName}
-          />
-        </div>
+      <form
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+        className="mt-6 space-y-4"
+      >
+        <form.Field
+          name="nombre"
+          validators={{
+            onChange: nombreSchema,
+          }}
+        >
+          {(field) => (
+            <div>
+              <label htmlFor="nombre" className="text-sm font-medium text-gray-800">
+                Nombre completo
+              </label>
+              <input
+                id="nombre"
+                name="nombre"
+                type="text"
+                autoComplete="name"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+                aria-invalid={field.state.meta.errors.length > 0}
+                aria-describedby={field.state.meta.errors.length > 0 ? 'nombre-error' : undefined}
+                className={inputClassName}
+              />
+              {field.state.meta.errors.length > 0 ? (
+                <p id="nombre-error" role="alert" className={errorClassName}>
+                  {getFieldError(field.state.meta.errors[0])}
+                </p>
+              ) : null}
+            </div>
+          )}
+        </form.Field>
 
-        <div>
-          <label htmlFor="email" className="text-sm font-medium text-gray-800">
-            Correo electrónico
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className={inputClassName}
-          />
-        </div>
+        <form.Field
+          name="email"
+          validators={{
+            onChange: emailSchema,
+          }}
+        >
+          {(field) => (
+            <div>
+              <label htmlFor="email" className="text-sm font-medium text-gray-800">
+                Correo electrónico
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+                aria-invalid={field.state.meta.errors.length > 0}
+                aria-describedby={field.state.meta.errors.length > 0 ? 'email-error' : undefined}
+                className={inputClassName}
+              />
+              {field.state.meta.errors.length > 0 ? (
+                <p id="email-error" role="alert" className={errorClassName}>
+                  {getFieldError(field.state.meta.errors[0])}
+                </p>
+              ) : null}
+            </div>
+          )}
+        </form.Field>
 
-        <div>
-          <label htmlFor="password" className="text-sm font-medium text-gray-800">
-            Contraseña
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            required
-            className={inputClassName}
-          />
-        </div>
+        <form.Field
+          name="password"
+          validators={{
+            onChange: passwordSchema,
+          }}
+        >
+          {(field) => (
+            <div>
+              <label htmlFor="password" className="text-sm font-medium text-gray-800">
+                Contraseña
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+                aria-invalid={field.state.meta.errors.length > 0}
+                aria-describedby={field.state.meta.errors.length > 0 ? 'password-error' : undefined}
+                className={inputClassName}
+              />
+              {field.state.meta.errors.length > 0 ? (
+                <p id="password-error" role="alert" className={errorClassName}>
+                  {getFieldError(field.state.meta.errors[0])}
+                </p>
+              ) : null}
+            </div>
+          )}
+        </form.Field>
 
-        <div>
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-800">
-            Confirmar contraseña
-          </label>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            required
-            className={inputClassName}
-          />
+        <form.Field
+          name="confirmPassword"
+          validators={{
+            onChangeListenTo: ['password'],
+            onChange: ({ value, fieldApi }) =>
+              value === fieldApi.form.state.values.password
+                ? undefined
+                : 'Las contraseñas no coinciden.',
+          }}
+        >
+          {(field) => (
+            <div>
+              <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-800">
+                Confirmar contraseña
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+                aria-invalid={field.state.meta.errors.length > 0}
+                aria-describedby={
+                  field.state.meta.errors.length > 0
+                    ? 'confirmPassword-error'
+                    : undefined
+                }
+                className={inputClassName}
+              />
+              {field.state.meta.errors.length > 0 ? (
+                <p id="confirmPassword-error" role="alert" className={errorClassName}>
+                  {getFieldError(field.state.meta.errors[0])}
+                </p>
+              ) : null}
+            </div>
+          )}
+        </form.Field>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form.Field name="estado">
+            {(field) => (
+              <div>
+                <label htmlFor="estado" className="text-sm font-medium text-gray-800">
+                  Estado
+                </label>
+                <input
+                  id="estado"
+                  name="estado"
+                  type="text"
+                  autoComplete="address-level1"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  className={inputClassName}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="municipio">
+            {(field) => (
+              <div>
+                <label htmlFor="municipio" className="text-sm font-medium text-gray-800">
+                  Municipio
+                </label>
+                <input
+                  id="municipio"
+                  name="municipio"
+                  type="text"
+                  autoComplete="address-level2"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  className={inputClassName}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="facultad">
+            {(field) => (
+              <div>
+                <label htmlFor="facultad" className="text-sm font-medium text-gray-800">
+                  Facultad
+                </label>
+                <input
+                  id="facultad"
+                  name="facultad"
+                  type="text"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  className={inputClassName}
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field
+            name="edad"
+            validators={{
+              onChange: edadSchema,
+            }}
+          >
+            {(field) => (
+              <div>
+                <label htmlFor="edad" className="text-sm font-medium text-gray-800">
+                  Edad
+                </label>
+                <input
+                  id="edad"
+                  name="edad"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={120}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  aria-invalid={field.state.meta.errors.length > 0}
+                  aria-describedby={field.state.meta.errors.length > 0 ? 'edad-error' : undefined}
+                  className={inputClassName}
+                />
+                {field.state.meta.errors.length > 0 ? (
+                  <p id="edad-error" role="alert" className={errorClassName}>
+                    {getFieldError(field.state.meta.errors[0])}
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="genero">
+            {(field) => (
+              <div className="sm:col-span-2">
+                <label htmlFor="genero" className="text-sm font-medium text-gray-800">
+                  Género
+                </label>
+                <select
+                  id="genero"
+                  name="genero"
+                  value={field.state.value}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  className={inputClassName}
+                >
+                  <option value="">Selecciona una opción</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="No binario">No binario</option>
+                  <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+                </select>
+              </div>
+            )}
+          </form.Field>
         </div>
 
         {state.error ? (
