@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -25,7 +26,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/15 bg-[var(--color-navy)] shadow-sm">
-      <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-6 px-4">
+      <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2">
         <div className="flex shrink-0 items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo-uanl.png" alt="Logo de la UANL" className="h-10 w-10" />
@@ -105,3 +106,4 @@ export default function Navbar() {
     </header>
   );
 }
+
