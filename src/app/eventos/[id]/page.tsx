@@ -47,11 +47,7 @@ export default async function EventoDetallePage({ params }: EventoPageProps) {
   if (error) {
     return (
       <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-800">
-<<<<<<< Updated upstream
         No fue posible cargar la información del evento. Intenta nuevamente más tarde.
-=======
-        No fue posible cargar la información del evento. Intenta nuevamente mas tarde.
->>>>>>> Stashed changes
       </div>
     );
   }

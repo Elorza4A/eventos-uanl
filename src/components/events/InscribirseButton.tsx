@@ -10,10 +10,14 @@ export default function InscribirseButton({
   idEvento,
   yaInscrito,
   disponible,
+  label = 'Inscribirme a este evento',
+  mensajeExito = 'Inscripción confirmada. Tu lugar quedó guardado.',
 }: {
   idEvento: number;
   yaInscrito: boolean;
   disponible: boolean;
+  label?: string;
+  mensajeExito?: string;
 }) {
   const [isPending, startTransition] = useTransition();
   const [mensaje, setMensaje] = useState<Mensaje | null>(null);
@@ -40,7 +44,7 @@ export default function InscribirseButton({
       const resultado = await inscribirseAction(idEvento);
 
       if (resultado.ok) {
-        setMensaje({ tipo: 'ok', texto: 'Inscripción confirmada. Tu lugar quedó guardado.' });
+        setMensaje({ tipo: 'ok', texto: mensajeExito });
         router.refresh();
       } else {
         setMensaje({ tipo: 'error', texto: resultado.message });
@@ -56,7 +60,7 @@ export default function InscribirseButton({
         disabled={isPending}
         className="inline-flex w-full items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-3.5 font-semibold text-white transition-colors hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
-        {isPending ? 'Registrando…' : 'Inscribirme a este evento'}
+        {isPending ? 'Registrando…' : label}
       </button>
 
       {mensaje ? (

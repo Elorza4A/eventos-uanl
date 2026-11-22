@@ -29,6 +29,7 @@ export type AsistenteActual = {
 };
 
 export type InscripcionDb = {
+  idInscripcion: number;
   idEvento: number;
   estatus: string;
   fechaInscripcion: string;
@@ -49,6 +50,7 @@ type EventoPublicoRow = {
 };
 
 type InscripcionRow = {
+  id_inscripcion: number;
   id_evento: number;
   fecha_inscripcion: string;
   estatus_inscripcion: { nombre_estatus: string } | { nombre_estatus: string }[] | null;
@@ -171,7 +173,7 @@ export async function getInscripcionesDeAsistente(
   const supabase = await getSupabase();
   const { data, error } = await supabase
     .from('inscripciones')
-    .select('id_evento,fecha_inscripcion,estatus_inscripcion(nombre_estatus)')
+    .select('id_inscripcion,id_evento,fecha_inscripcion,estatus_inscripcion(nombre_estatus)')
     .eq('id_asistente', idAsistente)
     .order('fecha_inscripcion', { ascending: false });
 
@@ -181,6 +183,7 @@ export async function getInscripcionesDeAsistente(
   }
 
   return ((data ?? []) as unknown as InscripcionRow[]).map((row) => ({
+    idInscripcion: Number(row.id_inscripcion),
     idEvento: Number(row.id_evento),
     estatus: nombreEstatus(row),
     fechaInscripcion: row.fecha_inscripcion,
