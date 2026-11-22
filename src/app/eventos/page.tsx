@@ -23,9 +23,6 @@ export default async function EventosPage() {
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-[var(--color-navy)] sm:text-4xl">
           Todos los eventos
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-          Aquí aparecen únicamente los eventos registrados en la base de datos institucional.
-        </p>
       </header>
 
       {error ? (
