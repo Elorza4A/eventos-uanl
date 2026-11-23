@@ -24,7 +24,10 @@ export default async function HomePage() {
   const { eventos, error } = await getEventosPublicos();
 
   const vigentes = eventos.filter(esEventoVigente);
-  const populares = [...vigentes].sort(ordenarPorPopularidad);
+  // El banner destaca los 4 eventos vigentes con más lugares libres.
+  const conMasCupos = [...vigentes].sort(
+    (a, b) => b.cupoDisponible - a.cupoDisponible || ordenarPorPopularidad(a, b),
+  );
   const proximos = [...vigentes].sort(porFechaInicio);
   const novedades = [...eventos].sort(
     (a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime(),
@@ -48,7 +51,7 @@ export default async function HomePage() {
         </p>
       ) : null}
 
-      <HeroCarousel events={aItems(populares.slice(0, 5))} />
+      <HeroCarousel events={aItems(conMasCupos.slice(0, 4))} />
 
       <EventSection
         id="proximos-eventos"

@@ -158,7 +158,7 @@ export default function HeroCarousel({ events }: { events: EventItem[] }) {
                     </span>
                     {index === 0 ? (
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--color-navy)]">
-                        Más popular
+                        Más cupos
                       </span>
                     ) : null}
                   </div>
