@@ -78,6 +78,13 @@ export const ROUTE_RULES: readonly RouteRule[] = [
     roles: STAFF_ROLES,
     loginPath: '/equipo/login',
   },
+  {
+    // Toda sección distinta de Inicio y de las páginas de acceso exige sesión.
+    // Las reglas específicas van primero, así que cada portal conserva su login.
+    pattern: /^\/(?!$|(?:login|registro|no-autorizado|auth\/callback)(?:\/|$)|equipo\/login(?:\/|$)).+$/,
+    roles: ALL_ROLES,
+    loginPath: '/login',
+  },
 ];
 
 export function getRouteRule(pathname: string): RouteRule | undefined {
