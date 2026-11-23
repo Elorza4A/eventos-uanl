@@ -19,9 +19,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
+import BadgeEstatus from '@/components/equipo/BadgeEstatus';
 import type { RolEquipo } from '@/types/database';
 
-import { ESTATUS_EVENTO, type EstatusEvento, type EventoFila } from './types';
+import { ESTATUS_EVENTO, type EventoFila } from './types';
 import {
   compararFechas,
   formatearFecha,
@@ -34,13 +35,6 @@ type Props = {
   rol: RolEquipo;
 };
 
-const estilosBadge: Record<EstatusEvento, string> = {
-  Activo: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  'En curso': 'bg-blue-50 text-blue-700 ring-blue-600/20',
-  Finalizado: 'bg-slate-100 text-slate-600 ring-slate-500/20',
-  Cancelado: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-};
-
 const incluyeSeleccion: FilterFn<EventoFila> = (row, columnId, valores) => {
   const seleccion = Array.isArray(valores) ? (valores as string[]) : [];
   return seleccion.length === 0 || seleccion.includes(String(row.getValue(columnId)));
@@ -51,16 +45,6 @@ const filtroPorNombre: FilterFn<EventoFila> = (row, _columnId, valor) => {
   if (!busqueda) return true;
   return normalizarTexto(row.original.nombreEvento).includes(busqueda);
 };
-
-function BadgeEstatus({ estatus }: { estatus: EstatusEvento }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${estilosBadge[estatus]}`}
-    >
-      {estatus}
-    </span>
-  );
-}
 
 function GrupoFiltros({
   titulo,

@@ -1,3 +1,5 @@
+import { ZONA_EVENTOS } from '@/lib/fechas-evento';
+
 import type { EstatusEvento } from './types';
 
 function fechaValida(valor: string | null | undefined): Date | null {
@@ -38,6 +40,32 @@ export function formatearFecha(valor: string | null): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+  }).format(fecha);
+}
+
+/** Detalle: solo el día, sin hora. */
+export function formatearDiaEvento(valor: string | null): string {
+  const fecha = fechaValida(valor);
+  if (!fecha) return '—';
+
+  return new Intl.DateTimeFormat('es-MX', {
+    timeZone: ZONA_EVENTOS,
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(fecha);
+}
+
+/** Detalle: solo la hora en la zona del evento. */
+export function formatearHoraEvento(valor: string | null): string {
+  const fecha = fechaValida(valor);
+  if (!fecha) return '—';
+
+  return new Intl.DateTimeFormat('es-MX', {
+    timeZone: ZONA_EVENTOS,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
   }).format(fecha);
 }
 

@@ -7,7 +7,9 @@ export type RolInterno = 'admin' | 'organizador' | 'asistente';
 export type PerfilEquipo = {
   rol: RolEquipo;
   rolInterno: Exclude<RolInterno, 'asistente'>;
+  idAdministrador: number | null;
   idDependencia: number | null;
+  nombre: string | null;
 };
 
 export type PerfilAsistente = {

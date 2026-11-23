@@ -25,7 +25,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   return {
     id: perfil.user.id,
     email: perfil.user.email,
-    nombre: perfil.asistente?.nombre ?? null,
+    nombre: perfil.equipo?.nombre ?? perfil.asistente?.nombre ?? null,
     rol: perfil.equipo?.rolInterno ?? 'asistente',
   };
 });
