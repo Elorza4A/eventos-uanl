@@ -214,3 +214,37 @@ export async function registerAsistente(
     success: 'Tu cuenta fue creada. Revisa tu correo para confirmarla antes de entrar.',
   };
 }
+
+/** Guarda la contraseña del invitado después de que Supabase confirmó el enlace. */
+export async function establecerContrasena(
+  _state: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const password = String(formData.get('password') ?? '');
+  const confirmPassword = String(formData.get('confirmPassword') ?? '');
+
+  if (password.length < 8) {
+    return { error: 'La contraseña debe tener al menos 8 caracteres.' };
+  }
+  if (password !== confirmPassword) {
+    return { error: 'Las contraseñas no coinciden.' };
+  }
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Tu enlace expiró. Solicita una nueva invitación.' };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    console.error('[auth] No se pudo establecer la contraseña:', error.message);
+    return { error: 'No se pudo guardar la contraseña. Intenta de nuevo.' };
+  }
+
+  redirect('/equipo');
+}
