@@ -21,14 +21,13 @@ export type NavLink = {
   href: string;
   roles: readonly Role[];
   alwaysVisible?: boolean;
-  /** Se resuelve con getHomeForRole() según la sesión. */
-  home?: boolean;
 };
 
+// Visitantes: solo Inicio. Asistentes autenticados: Inicio, Eventos y Mis eventos.
 export const NAV_LINKS: readonly NavLink[] = [
-  { name: 'Inicio', href: '/', roles: ALL_ROLES, alwaysVisible: true, home: true },
-  { name: 'Eventos', href: '/eventos', roles: ALL_ROLES, alwaysVisible: true },
-  { name: 'Mis eventos', href: '/inicio', roles: ASSISTANT_ROLES },
+  { name: 'Inicio', href: '/', roles: ALL_ROLES, alwaysVisible: true },
+  { name: 'Eventos', href: '/eventos', roles: ASSISTANT_ROLES },
+  { name: 'Mis eventos', href: '/mis-eventos', roles: ASSISTANT_ROLES },
 ];
 
 export type RouteRule = {
@@ -41,6 +40,11 @@ export type RouteRule = {
 export const ROUTE_RULES: readonly RouteRule[] = [
   {
     pattern: /^\/inicio(?:\/|$)/,
+    roles: ASSISTANT_ROLES,
+    loginPath: '/login',
+  },
+  {
+    pattern: /^\/mis-eventos(?:\/|$)/,
     roles: ASSISTANT_ROLES,
     loginPath: '/login',
   },
@@ -89,8 +93,6 @@ export function canAccess(role: Role | undefined, pathname: string): boolean {
 export function visibleLinks(role?: Role): NavLink[] {
   return NAV_LINKS.filter(
     (link) => link.alwaysVisible || (!!role && link.roles.includes(role)),
-  ).map((link) =>
-    link.home ? { ...link, href: role ? getHomeForRole(role) : '/' } : link,
   );
 }
 

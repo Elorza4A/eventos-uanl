@@ -1,11 +1,19 @@
 import EventCard from '@/components/events/EventCard';
 import { ASSISTANT_ROLES } from '@/config/permissions';
-import { getUpcomingEvents } from '@/data/events';
 import { requireRole } from '@/lib/dal';
+import { esEventoActivo, getEventosPublicos, ordenarPorPopularidad } from '@/lib/eventos-db';
+import { eventoDbAEventoItem } from '@/lib/eventos-vista';
+
+export const dynamic = 'force-dynamic';
 
 export default async function InicioAsistentePage() {
   const user = await requireRole(ASSISTANT_ROLES, '/login');
-  const eventos = getUpcomingEvents(3);
+  const { eventos } = await getEventosPublicos();
+  const items = eventos
+    .filter(esEventoActivo)
+    .sort(ordenarPorPopularidad)
+    .slice(0, 3)
+    .map((evento, indice) => eventoDbAEventoItem(evento, indice));
 
   return (
     <div className="space-y-8">
@@ -20,11 +28,17 @@ export default async function InicioAsistentePage() {
         </p>
       </header>
 
-      <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {eventos.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))}
-      </section>
+      {items.length > 0 ? (
+        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </section>
+      ) : (
+        <p className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-10 text-center text-sm text-slate-500">
+          Por ahora no hay eventos disponibles. Vuelve pronto para descubrir nuevas actividades.
+        </p>
+      )}
     </div>
   );
 }

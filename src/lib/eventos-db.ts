@@ -3,7 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 
 /**
  * Acceso a los eventos desde la vista pública de Supabase.
- * Los datos de demostración de `src/data/events.ts` se dejan intactos para el inicio.
+ * La popularidad y el cupo disponible se obtienen de una RPC agregada, sin
+ * exponer la tabla privada de inscripciones.
  */
 
 export type EventoDb = {
@@ -19,6 +20,10 @@ export type EventoDb = {
   dependenciaId: number;
   estatus: string;
   dependencia?: string;
+  /** Inscripciones Activa/Asistió, calculadas por la RPC de Supabase. */
+  inscritos: number;
+  /** Lugares libres calculados por la misma RPC. */
+  cupoDisponible: number;
 };
 
 export type AsistenteActual = {
@@ -49,6 +54,17 @@ type EventoPublicoRow = {
   estatus_actual: string;
 };
 
+type PopularidadRow = {
+  id_evento: number;
+  inscritos: number;
+  cupo_disponible: number;
+};
+
+type DependenciaRow = {
+  id_dependencia: number;
+  nombre_dependencia: string;
+};
+
 type InscripcionRow = {
   id_inscripcion: number;
   id_evento: number;
@@ -72,6 +88,8 @@ function mapEvento(row: EventoPublicoRow): EventoDb {
     fechaCreacion: row.fecha_creacion,
     dependenciaId: Number(row.id_dependencia),
     estatus: row.estatus_actual,
+    inscritos: 0,
+    cupoDisponible: Number(row.cupo_maximo),
   };
 }
 
@@ -85,23 +103,82 @@ async function getSupabase() {
   return createClient(await cookies());
 }
 
+/** Totales agregados por evento; la RPC evita dar acceso a inscripciones privadas. */
+async function getPopularidadEventos() {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.rpc('popularidad_eventos_uanl');
+
+  if (error) {
+    console.error('[eventos] Error al consultar popularidad:', error.message);
+    return new Map<number, { inscritos: number; cupoDisponible: number }>();
+  }
+
+  return new Map<number, { inscritos: number; cupoDisponible: number }>(
+    ((data ?? []) as PopularidadRow[]).map((row) => [
+      Number(row.id_evento),
+      {
+        inscritos: Number(row.inscritos),
+        cupoDisponible: Number(row.cupo_disponible),
+      },
+    ]),
+  );
+}
+
+/** Activo = admite nuevas inscripciones; vigente = aún no ha finalizado. */
+export function esEventoActivo(evento: EventoDb) {
+  return evento.estatus === 'Activo';
+}
+
+export function esEventoVigente(evento: EventoDb) {
+  return evento.estatus === 'Activo' || evento.estatus === 'En curso';
+}
+
+export function ordenarPorPopularidad(a: EventoDb, b: EventoDb) {
+  return (
+    b.inscritos - a.inscritos ||
+    new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime()
+  );
+}
+
 /** Lista los eventos publicados. Si falla la consulta, devuelve el mensaje de error. */
 export async function getEventosPublicos(): Promise<{
   eventos: EventoDb[];
   error: string | null;
 }> {
   const supabase = await getSupabase();
-  const { data, error } = await supabase
-    .from('eventos_publicos')
-    .select(EVENTO_COLUMNS)
-    .order('fecha_inicio', { ascending: true });
+  const [eventosResult, popularidad, dependenciasResult] = await Promise.all([
+    supabase
+      .from('eventos_publicos')
+      .select(EVENTO_COLUMNS)
+      .order('fecha_inicio', { ascending: true }),
+    getPopularidadEventos(),
+    supabase.from('dependencia').select('id_dependencia,nombre_dependencia'),
+  ]);
 
+  const { data, error } = eventosResult;
   if (error) {
     console.error('[eventos] Error al consultar eventos_publicos:', error.message);
     return { eventos: [], error: error.message };
   }
 
-  return { eventos: ((data ?? []) as EventoPublicoRow[]).map(mapEvento), error: null };
+  const dependencias = new Map<number, string>(
+    ((dependenciasResult.data ?? []) as DependenciaRow[]).map((row) => [
+      Number(row.id_dependencia),
+      row.nombre_dependencia,
+    ]),
+  );
+
+  const eventos = ((data ?? []) as EventoPublicoRow[]).map((row) => {
+    const evento = mapEvento(row);
+    const pop = popularidad.get(evento.id);
+    evento.inscritos = pop?.inscritos ?? 0;
+    evento.cupoDisponible =
+      pop?.cupoDisponible ?? Math.max(evento.cupoMaximo - evento.inscritos, 0);
+    evento.dependencia = dependencias.get(evento.dependenciaId) ?? 'Dependencia UANL';
+    return evento;
+  });
+
+  return { eventos, error: null };
 }
 
 /** Obtiene un evento por su id. */
@@ -126,13 +203,19 @@ export async function getEventoPublico(id: number): Promise<{
   if (!data) return { evento: null, error: null };
 
   const evento = mapEvento(data as EventoPublicoRow);
-  const { data: dependencia } = await supabase
-    .from('dependencia')
-    .select('nombre_dependencia')
-    .eq('id_dependencia', evento.dependenciaId)
-    .maybeSingle();
+  const [popularidad, dependenciaResult] = await Promise.all([
+    getPopularidadEventos(),
+    supabase
+      .from('dependencia')
+      .select('nombre_dependencia')
+      .eq('id_dependencia', evento.dependenciaId)
+      .maybeSingle(),
+  ]);
 
-  evento.dependencia = dependencia?.nombre_dependencia ?? 'Dependencia UANL';
+  const pop = popularidad.get(evento.id);
+  evento.inscritos = pop?.inscritos ?? 0;
+  evento.cupoDisponible = pop?.cupoDisponible ?? Math.max(evento.cupoMaximo - evento.inscritos, 0);
+  evento.dependencia = dependenciaResult.data?.nombre_dependencia ?? 'Dependencia UANL';
   return { evento, error: null };
 }
 
@@ -190,6 +273,29 @@ export async function getInscripcionesDeAsistente(
   }));
 }
 
+/** Estatus de la inscripción del alumno en un evento, o null si no existe. */
+export async function obtenerEstatusInscripcion(
+  idEvento: number,
+  idAsistente: number,
+): Promise<string | null> {
+  if (!Number.isInteger(idEvento) || !Number.isInteger(idAsistente)) return null;
+
+  const supabase = await getSupabase();
+  const { data, error } = await supabase
+    .from('inscripciones')
+    .select('id_inscripcion,estatus_inscripcion(nombre_estatus)')
+    .eq('id_evento', idEvento)
+    .eq('id_asistente', idAsistente)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[inscripciones] Error al consultar el estatus:', error.message);
+    return null;
+  }
+
+  return data ? nombreEstatus(data as unknown as InscripcionRow) : null;
+}
+
 /** Indica si el alumno ya tiene una inscripción vigente o asistida en el evento. */
 export async function yaEstaInscrito(
   idEvento: number,
@@ -197,16 +303,6 @@ export async function yaEstaInscrito(
 ): Promise<boolean> {
   if (!idAsistente) return false;
 
-  const supabase = await getSupabase();
-  const { data } = await supabase
-    .from('inscripciones')
-    .select('id_evento,fecha_inscripcion,estatus_inscripcion(nombre_estatus)')
-    .eq('id_evento', idEvento)
-    .eq('id_asistente', idAsistente)
-    .maybeSingle();
-
-  if (!data) return false;
-
-  const estatus = nombreEstatus(data as unknown as InscripcionRow);
+  const estatus = await obtenerEstatusInscripcion(idEvento, idAsistente);
   return estatus === 'Activa' || estatus === 'Asistió';
 }
