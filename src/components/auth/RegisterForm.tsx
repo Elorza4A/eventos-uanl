@@ -115,7 +115,7 @@ export default function RegisterForm() {
         <h1 className="text-xl font-bold text-gray-900">¡Casi listo!</h1>
         <p className="mt-2 text-sm leading-relaxed text-gray-600">{state.success}</p>
         <Link
-          href="/login/asistente"
+          href="/login"
           className="mt-6 inline-block rounded-lg bg-[var(--color-navy)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-primary)]"
         >
           Ir al acceso de asistentes
@@ -485,7 +485,7 @@ export default function RegisterForm() {
       <p className="mt-6 border-t border-gray-100 pt-5 text-center text-sm text-gray-600">
         ¿Ya tienes cuenta?{' '}
         <Link
-          href="/login/asistente"
+          href="/login"
           className="font-medium text-[var(--color-primary)] hover:underline"
         >
           Inicia sesión
