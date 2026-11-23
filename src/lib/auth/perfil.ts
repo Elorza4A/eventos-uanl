@@ -42,6 +42,16 @@ function isSingle(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
+function comoEntero(valor: unknown): number | null {
+  if (valor === null || valor === undefined || valor === '') return null;
+  const numero = typeof valor === 'number' ? valor : Number(valor);
+  return Number.isFinite(numero) ? numero : null;
+}
+
+function comoTexto(valor: unknown): string | null {
+  return typeof valor === 'string' && valor.trim() !== '' ? valor : null;
+}
+
 async function findOwnRow(
   supabase: DbClient,
   table: 'administradores' | 'asistentes',
@@ -110,18 +120,14 @@ async function resolveEquipo(
   const rol = normalizeRol(candidato ?? row.nombre_rol);
   if (!rol) return null;
 
-  const dependencia = row.id_dependencia;
-  const idDependencia =
-    typeof dependencia === 'number'
-      ? dependencia
-      : typeof dependencia === 'string' && dependencia.trim() !== ''
-        ? Number(dependencia)
-        : null;
+  const idDependencia = comoEntero(row.id_dependencia);
 
   return {
     rol,
     rolInterno: rol === 'Administrador' ? 'admin' : 'organizador',
-    idDependencia: Number.isFinite(idDependencia) ? idDependencia : null,
+    idAdministrador: comoEntero(row.id_administrador ?? row.id),
+    idDependencia,
+    nombre: comoTexto(row.nombre_admin ?? row.nombre_administrador ?? row.nombre),
   };
 }
 
