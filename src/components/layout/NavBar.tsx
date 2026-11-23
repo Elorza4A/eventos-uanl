@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
+import { logout } from '@/app/actions/auth';
 import { visibleLinks, type Role } from '@/config/permissions';
 
 export type NavUser = {
@@ -48,15 +49,25 @@ export default function Navbar({ user }: { user: NavUser | null }) {
 
         <div className="ml-auto flex items-center gap-3">
           {user ? (
-            <div className="hidden shrink-0 border-l border-white/30 pl-5 text-sm text-white md:block">
-              <span className="flex items-center gap-2 text-xs text-white/70">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
-                Sesión iniciada
-              </span>
-              <span className="block max-w-48 truncate font-medium" title={nombreUsuario}>
-                {nombreUsuario}
-              </span>
-            </div>
+            <>
+              <div className="hidden shrink-0 border-l border-white/30 pl-5 text-sm text-white md:block">
+                <span className="flex items-center gap-2 text-xs text-white/70">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
+                  Sesión iniciada
+                </span>
+                <span className="block max-w-48 truncate font-medium" title={nombreUsuario}>
+                  {nombreUsuario}
+                </span>
+              </div>
+              <form action={logout} className="hidden sm:block">
+                <button
+                  type="submit"
+                  className="rounded-full border border-white/40 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+                >
+                  Cerrar sesión
+                </button>
+              </form>
+            </>
           ) : (
             <Link
               href="/login"
@@ -120,6 +131,15 @@ export default function Navbar({ user }: { user: NavUser | null }) {
                   Sesión iniciada
                 </span>
                 <span className="mt-1 block break-all font-medium">{nombreUsuario}</span>
+                <form action={logout} className="mt-3">
+                  <button
+                    type="submit"
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+                  >
+                    Cerrar sesión
+                  </button>
+                </form>
               </>
             ) : (
               <Link
