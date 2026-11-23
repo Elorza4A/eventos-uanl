@@ -1,6 +1,6 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { getHomeForRole, getRouteRule, type Role } from '@/config/permissions';
@@ -57,6 +57,30 @@ async function authenticate(
   let perfil;
   try {
     perfil = await resolvePerfil(supabase, data.user);
+
+    if (portal === 'asistente' && !perfil.asistente) {
+      const metadata = data.user.user_metadata;
+      const comoNumero = (valor: unknown) =>
+        typeof valor === 'number' && Number.isFinite(valor) ? valor : null;
+      const nombre =
+        typeof metadata.nombre === 'string' ? metadata.nombre : '';
+
+      const { error: perfilError } = await supabase.rpc(
+        'registrar_asistente_uanl',
+        {
+          p_nombre: nombre,
+          p_id_facultad: comoNumero(metadata.id_facultad),
+          p_id_estado: comoNumero(metadata.id_estado),
+          p_id_municipio: comoNumero(metadata.id_municipio),
+          p_edad: comoNumero(metadata.edad),
+          p_id_genero: comoNumero(metadata.id_genero),
+          p_direccion: null,
+        },
+      );
+
+      if (perfilError) throw perfilError;
+      perfil = await resolvePerfil(supabase, data.user);
+    }
   } catch (perfilError) {
     console.error('[auth] No se pudo resolver el perfil:', perfilError);
     await supabase.auth.signOut();
@@ -114,6 +138,11 @@ export async function registerAsistente(
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
   const confirmPassword = String(formData.get('confirmPassword') ?? '');
+  const estado = String(formData.get('estado') ?? '').trim();
+  const municipio = String(formData.get('municipio') ?? '').trim();
+  const facultad = String(formData.get('facultad') ?? '').trim();
+  const edad = String(formData.get('edad') ?? '').trim();
+  const genero = String(formData.get('genero') ?? '').trim();
 
   if (!nombre || !email || !password) {
     return { error: 'Completa todos los campos.' };
@@ -125,14 +154,33 @@ export async function registerAsistente(
     return { error: 'La contraseña debe tener al menos 8 caracteres.' };
   }
 
+  const idEstado = estado ? Number(estado) : null;
+  const idMunicipio = municipio ? Number(municipio) : null;
+  const idFacultad = facultad ? Number(facultad) : null;
+  const edadAsistente = edad ? Number(edad) : null;
+  const idGenero = genero ? Number(genero) : null;
+
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+  const requestHeaders = await headers();
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    requestHeaders.get('origin') ??
+    'http://localhost:3000';
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { nombre },
+      data: {
+        nombre,
+        id_estado: idEstado,
+        id_municipio: idMunicipio,
+        id_facultad: idFacultad,
+        edad: edadAsistente,
+        id_genero: idGenero,
+      },
+      emailRedirectTo: `${origin}/auth/callback`,
     },
   });
 
@@ -141,6 +189,24 @@ export async function registerAsistente(
   }
 
   if (data.session) {
+    const { error: perfilError } = await supabase.rpc(
+      'registrar_asistente_uanl',
+      {
+        p_nombre: nombre,
+        p_id_facultad: idFacultad,
+        p_id_estado: idEstado,
+        p_id_municipio: idMunicipio,
+        p_edad: edadAsistente,
+        p_id_genero: idGenero,
+        p_direccion: null,
+      },
+    );
+
+    if (perfilError) {
+      await supabase.auth.signOut();
+      return { error: perfilError.message };
+    }
+
     redirect('/inicio');
   }
 
