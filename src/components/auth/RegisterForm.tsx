@@ -1,11 +1,17 @@
 'use client';
 
-import { useActionState } from 'react';
+import { startTransition, useActionState } from 'react';
 import Link from 'next/link';
-import { useForm } from '@tanstack/react-form';
+import { useForm, useStore } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { registerAsistente } from '@/app/actions/auth';
+import {
+  useEstados,
+  useFacultades,
+  useGeneros,
+  useMunicipios,
+} from '@/hooks/useCatalogos';
 import type { RegisterState } from '@/types/auth';
 
 const inputClassName =
@@ -88,9 +94,20 @@ export default function RegisterForm() {
       formData.set('facultad', value.facultad);
       formData.set('edad', value.edad);
       formData.set('genero', value.genero);
-      formAction(formData);
+      startTransition(() => {
+        formAction(formData);
+      });
     },
   });
+  const idEstadoSeleccionado = useStore(
+    form.store,
+    (state) =>
+      state.values.estado ? Number(state.values.estado) : null,
+  );
+  const estadosQuery = useEstados();
+  const municipiosQuery = useMunicipios(idEstadoSeleccionado);
+  const facultadesQuery = useFacultades();
+  const generosQuery = useGeneros();
 
   if (state.success) {
     return (
@@ -269,15 +286,33 @@ export default function RegisterForm() {
                 <label htmlFor="estado" className="text-sm font-medium text-gray-800">
                   Estado
                 </label>
-                <input
+                <select
                   id="estado"
                   name="estado"
-                  type="text"
-                  autoComplete="address-level1"
                   value={field.state.value}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value);
+                    form.setFieldValue('municipio', '');
+                  }}
+                  disabled={estadosQuery.isPending}
                   className={inputClassName}
-                />
+                >
+                  <option value="">
+                    {estadosQuery.isPending
+                      ? 'Cargando estados…'
+                      : 'Selecciona un estado'}
+                  </option>
+                  {estadosQuery.data?.map((estado) => (
+                    <option key={estado.id_estado} value={estado.id_estado}>
+                      {estado.nombre_estado}
+                    </option>
+                  ))}
+                </select>
+                {estadosQuery.isError ? (
+                  <p role="alert" className={errorClassName}>
+                    No fue posible cargar los estados.
+                  </p>
+                ) : null}
               </div>
             )}
           </form.Field>
@@ -288,15 +323,37 @@ export default function RegisterForm() {
                 <label htmlFor="municipio" className="text-sm font-medium text-gray-800">
                   Municipio
                 </label>
-                <input
+                <select
                   id="municipio"
                   name="municipio"
-                  type="text"
-                  autoComplete="address-level2"
                   value={field.state.value}
                   onChange={(event) => field.handleChange(event.target.value)}
+                  disabled={
+                    idEstadoSeleccionado === null || municipiosQuery.isPending
+                  }
                   className={inputClassName}
-                />
+                >
+                  <option value="">
+                    {!idEstadoSeleccionado
+                      ? 'Primero selecciona un estado'
+                      : municipiosQuery.isPending
+                        ? 'Cargando municipios…'
+                        : 'Selecciona un municipio'}
+                  </option>
+                  {municipiosQuery.data?.map((municipio) => (
+                    <option
+                      key={municipio.id_municipio}
+                      value={municipio.id_municipio}
+                    >
+                      {municipio.nombre_municipio}
+                    </option>
+                  ))}
+                </select>
+                {municipiosQuery.isError ? (
+                  <p role="alert" className={errorClassName}>
+                    No fue posible cargar los municipios.
+                  </p>
+                ) : null}
               </div>
             )}
           </form.Field>
@@ -307,14 +364,33 @@ export default function RegisterForm() {
                 <label htmlFor="facultad" className="text-sm font-medium text-gray-800">
                   Facultad
                 </label>
-                <input
+                <select
                   id="facultad"
                   name="facultad"
-                  type="text"
                   value={field.state.value}
                   onChange={(event) => field.handleChange(event.target.value)}
+                  disabled={facultadesQuery.isPending}
                   className={inputClassName}
-                />
+                >
+                  <option value="">
+                    {facultadesQuery.isPending
+                      ? 'Cargando facultades…'
+                      : 'Selecciona una facultad'}
+                  </option>
+                  {facultadesQuery.data?.map((facultad) => (
+                    <option
+                      key={facultad.id_facultad}
+                      value={facultad.id_facultad}
+                    >
+                      {facultad.nombre_facultad}
+                    </option>
+                  ))}
+                </select>
+                {facultadesQuery.isError ? (
+                  <p role="alert" className={errorClassName}>
+                    No fue posible cargar las facultades.
+                  </p>
+                ) : null}
               </div>
             )}
           </form.Field>
@@ -364,14 +440,25 @@ export default function RegisterForm() {
                   name="genero"
                   value={field.state.value}
                   onChange={(event) => field.handleChange(event.target.value)}
+                  disabled={generosQuery.isPending}
                   className={inputClassName}
                 >
-                  <option value="">Selecciona una opción</option>
-                  <option value="Femenino">Femenino</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="No binario">No binario</option>
-                  <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+                  <option value="">
+                    {generosQuery.isPending
+                      ? 'Cargando géneros…'
+                      : 'Selecciona una opción'}
+                  </option>
+                  {generosQuery.data?.map((genero) => (
+                    <option key={genero.id_genero} value={genero.id_genero}>
+                      {genero.nombre_genero}
+                    </option>
+                  ))}
                 </select>
+                {generosQuery.isError ? (
+                  <p role="alert" className={errorClassName}>
+                    No fue posible cargar los géneros.
+                  </p>
+                ) : null}
               </div>
             )}
           </form.Field>
