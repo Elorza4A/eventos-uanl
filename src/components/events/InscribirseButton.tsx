@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { inscribirseAction } from '@/app/eventos/actions';
+import { inscribirseAction } from '@/app/(public)/eventos/actions';
 
 type Mensaje = { tipo: 'ok' | 'error'; texto: string };
 
