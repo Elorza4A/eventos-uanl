@@ -15,12 +15,12 @@ export default async function NavBarServer() {
       user={
         user
           ? {
-              nombre,
+              nombre: displayName ?? "",
               email: user.email,
               rol: user.rol,
             }
           : null
       }
-    />
+    />  
   );
 }

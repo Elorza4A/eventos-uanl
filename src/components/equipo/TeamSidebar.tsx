@@ -90,7 +90,16 @@ export default function TeamSidebar({ rol, nombre, email }: Props) {
         <p className="mt-1 text-xs font-semibold text-white/80">
           {ROLE_LABELS[rol]}
         </p>
-        <LogoutButton className="mt-4 w-full rounded-lg border border-white/40 px-3 py-2 text-sm font-medium transition hover:bg-white/10" />
+        <form action={async () => {
+          await logout();
+        }} className="mt-4">
+          <button
+            type="submit"
+            className="w-full rounded-lg border border-white/40 px-3 py-2 text-sm font-medium transition hover:bg-white/10"
+          >
+            Cerrar sesión
+          </button>
+        </form>
       </div>
     </aside>
   );
