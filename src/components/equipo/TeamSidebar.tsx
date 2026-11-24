@@ -1,6 +1,6 @@
 'use client';
 
-import { logout } from '@/app/actions/auth';
+import LogoutButton from '@/components/auth/LogoutButton';
 import { ROLE_LABELS, type Role } from '@/config/permissions';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -90,14 +90,7 @@ export default function TeamSidebar({ rol, nombre, email }: Props) {
         <p className="mt-1 text-xs font-semibold text-white/80">
           {ROLE_LABELS[rol]}
         </p>
-        <form action={logout} className="mt-4">
-          <button
-            type="submit"
-            className="w-full rounded-lg border border-white/40 px-3 py-2 text-sm font-medium transition hover:bg-white/10"
-          >
-            Cerrar sesión
-          </button>
-        </form>
+        <LogoutButton className="mt-4 w-full rounded-lg border border-white/40 px-3 py-2 text-sm font-medium transition hover:bg-white/10" />
       </div>
     </aside>
   );

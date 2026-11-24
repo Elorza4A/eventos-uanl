@@ -103,7 +103,21 @@ export default function EventoDbCard({
           <p className="text-slate-500">{horario}</p>
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <span className="rounded-full bg-gray-100 px-2.5 py-1 text-slate-700">
+              {evento.inscritos} inscritos
+            </span>
+            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-slate-700">
               Cupo máximo: {evento.cupoMaximo}
+            </span>
+            <span
+              className={`rounded-full px-2.5 py-1 ${
+                evento.cupoDisponible > 0
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-rose-50 text-rose-700'
+              }`}
+            >
+              {evento.cupoDisponible > 0
+                ? `${evento.cupoDisponible} lugares libres`
+                : 'Cupo lleno'}
             </span>
             {estatusInscripcion ? (
               <span className="rounded-full bg-[var(--color-primary)] px-2.5 py-1 text-white">

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import EventCard from './EventCard';
-import type { EventItem } from '@/data/events';
+import type { EventItem } from '@/lib/eventos-vista';
 
 type Accent = 'blue' | 'emerald' | 'rose';
 
