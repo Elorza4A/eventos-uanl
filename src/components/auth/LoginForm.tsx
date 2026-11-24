@@ -39,6 +39,12 @@ export default function LoginForm({
       <h1 className="mt-1 text-2xl font-bold text-gray-900">{title}</h1>
       <p className="mt-2 text-sm leading-relaxed text-gray-600">{description}</p>
 
+      {next ? (
+        <p className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+          Inicia sesión o regístrate para continuar a la sección solicitada.
+        </p>
+      ) : null}
+
       <form action={formAction} className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next} />
 

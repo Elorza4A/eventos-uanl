@@ -11,7 +11,7 @@ import {
   getOccupancyPercent,
   getRemainingSpots,
   type EventItem,
-} from '@/data/events';
+} from '@/lib/eventos-vista';
 
 const ROTATION_MS = 5000;
 
@@ -156,6 +156,11 @@ export default function HeroCarousel({ events }: { events: EventItem[] }) {
                     <span className="rounded-full border border-white/30 px-3 py-1 text-xs font-medium text-white/90">
                       Evento destacado
                     </span>
+                    {index === 0 ? (
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--color-navy)]">
+                        Más inscritos
+                      </span>
+                    ) : null}
                   </div>
 
                   <h1 className="mt-5 text-3xl leading-tight font-bold text-white sm:text-4xl lg:text-5xl">
@@ -180,20 +185,22 @@ export default function HeroCarousel({ events }: { events: EventItem[] }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <UsersIcon />
-                      <span>{remaining} cupos disponibles</span>
+                      <span>
+                        {event.registered} inscritos · {remaining} cupos disponibles
+                      </span>
                     </div>
                   </dl>
 
                   <div className="mt-8 flex flex-wrap items-center gap-3">
                     <Link
-                      href="/eventos"
+                      href={`/eventos/${event.id}`}
                       className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none"
                     >
                       Ver detalles del evento
                       <span aria-hidden="true">→</span>
                     </Link>
                     <Link
-                      href="/inicio"
+                      href={`/eventos/${event.id}`}
                       className="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                     >
                       Guardar en mis eventos
@@ -245,7 +252,7 @@ export default function HeroCarousel({ events }: { events: EventItem[] }) {
                   </div>
 
                   <Link
-                    href="/eventos"
+                    href={`/eventos/${event.id}`}
                     className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-950/80 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-950 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                   >
                     Reservar mi lugar

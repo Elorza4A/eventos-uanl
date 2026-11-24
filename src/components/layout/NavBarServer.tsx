@@ -1,13 +1,13 @@
+import Navbar from '@/components/layout/NavBar';
 import { getCurrentUser } from '@/lib/dal';
 import { getAsistenteActual } from '@/lib/eventos-db';
-import Navbar from '@/components/layout/NavBar';
 
-/** El navbar cliente maneja hoy sus propias ligas; este wrapper solo lo monta. */
+/** Resuelve la sesión real en el servidor y la pasa al navbar cliente. */
 export default async function NavBarServer() {
   const user = await getCurrentUser();
   const asistente = user ? await getAsistenteActual() : null;
   const displayName = user
-    ? user.nombre || asistente?.nombre || user.email
+    ? user.nombre?.trim() || asistente?.nombre || user.email
     : null;
 
   return (
@@ -17,6 +17,7 @@ export default async function NavBarServer() {
           ? {
               nombre: displayName ?? "",
               email: user.email,
+              rol: user.rol,
             }
           : null
       }

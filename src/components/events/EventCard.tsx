@@ -6,7 +6,7 @@ import {
   formatEventWeekday,
   getRemainingSpots,
   type EventItem,
-} from '@/data/events';
+} from '@/lib/eventos-vista';
 
 function CalendarIcon() {
   return (
@@ -133,7 +133,7 @@ export default function EventCard({ event }: { event: EventItem }) {
         <div className="absolute inset-x-5 bottom-5 text-center text-white drop-shadow-md">
           <h3 className="line-clamp-2 text-base font-bold leading-tight sm:text-lg">
             <Link
-              href="/eventos"
+              href={`/eventos/${event.id}`}
               className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               {event.title}
