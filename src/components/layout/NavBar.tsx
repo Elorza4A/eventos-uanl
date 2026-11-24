@@ -1,10 +1,10 @@
 'use client';
 
+import LogoutButton from '@/components/auth/LogoutButton';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
-import { logout } from '@/app/actions/auth';
 import { visibleLinks, type Role } from '@/config/permissions';
 
 export type NavUser = {
@@ -59,14 +59,9 @@ export default function Navbar({ user }: { user: NavUser | null }) {
                   {nombreUsuario}
                 </span>
               </div>
-              <form action={logout} className="hidden sm:block">
-                <button
-                  type="submit"
-                  className="rounded-full border border-white/40 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-                >
-                  Cerrar sesión
-                </button>
-              </form>
+              <LogoutButton
+                className="hidden rounded-full border border-white/40 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none sm:inline-flex"
+              />
             </>
           ) : (
             <Link
@@ -131,15 +126,11 @@ export default function Navbar({ user }: { user: NavUser | null }) {
                   Sesión iniciada
                 </span>
                 <span className="mt-1 block break-all font-medium">{nombreUsuario}</span>
-                <form action={logout} className="mt-3">
-                  <button
-                    type="submit"
-                    onClick={() => setMenuOpen(false)}
+                <div className="mt-3">
+                  <LogoutButton
                     className="w-full rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-                  >
-                    Cerrar sesión
-                  </button>
-                </form>
+                  />
+                </div>
               </>
             ) : (
               <Link
