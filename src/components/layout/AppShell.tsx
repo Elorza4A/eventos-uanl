@@ -12,7 +12,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         <NavBarServer />
       </Suspense>
-      <main className="mx-auto w-full max-w-6xl flex-1 p-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl min-w-0 flex-1 p-4 sm:p-6">{children}</main>
       <Footer />
     </>
   );

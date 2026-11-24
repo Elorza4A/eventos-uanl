@@ -52,8 +52,13 @@ export default function EventoDbCard({
   const horario = `${formatearHora(evento.fechaInicio)} – ${formatearHora(evento.fechaFin)} h`;
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-gray-200 bg-white shadow-sm transition duration-300 focus-within:ring-2 focus-within:ring-[var(--color-accent)] focus-within:ring-offset-2 hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative h-44 overflow-hidden bg-[var(--color-navy)]">
+    <Link
+      href={`/eventos/${evento.id}`}
+      aria-label={`Ver detalles de ${evento.nombre}`}
+      className="group block h-full rounded-[1.4rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+    >
+    <article className="relative flex h-full min-w-0 flex-col overflow-hidden rounded-[1.4rem] border border-gray-200 bg-white shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
+      <div className="relative h-40 overflow-hidden bg-[var(--color-navy)] sm:h-44">
         {evento.imagenUrl ? (
           <Image
             src={evento.imagenUrl}
@@ -76,17 +81,12 @@ export default function EventoDbCard({
         <div className="absolute inset-x-4 bottom-4 text-white">
           <p className="text-xs font-medium text-white/90">{formatearFecha(evento.fechaInicio)}</p>
           <h3 className="mt-1 line-clamp-2 text-base leading-tight font-bold sm:text-lg">
-            <Link
-              href={`/eventos/${evento.id}`}
-              className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
-            >
-              {evento.nombre}
-            </Link>
+            {evento.nombre}
           </h3>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
         <p className="text-xs font-semibold text-[var(--color-primary)]">
           {evento.dependencia ?? 'Dependencia UANL'}
         </p>
@@ -128,5 +128,6 @@ export default function EventoDbCard({
         </div>
       </div>
     </article>
+    </Link>
   );
 }

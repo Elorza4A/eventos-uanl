@@ -11,6 +11,7 @@ export type EventItem = {
   title: string;
   category: string;
   description: string;
+  imageUrl: string | null;
   startDate: string;
   endDate?: string;
   location: string;
@@ -115,6 +116,7 @@ export function eventoDbAEventoItem(evento: EventoDb, indice = 0): EventItem {
     title: evento.nombre,
     category: evento.dependencia ?? 'Evento UANL',
     description: evento.descripcion || 'Este evento aún no tiene una descripción registrada.',
+    imageUrl: evento.imagenUrl,
     startDate: evento.fechaInicio,
     endDate: evento.fechaFin,
     location: evento.direccion || 'Ubicación por definir',

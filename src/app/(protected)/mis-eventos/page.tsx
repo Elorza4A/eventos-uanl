@@ -140,9 +140,9 @@ export default async function MisEventosPage() {
         </div>
 
         {misInscripciones.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {misInscripciones.map(({ evento, inscripcion }) => (
-              <div key={inscripcion.idInscripcion} className="flex flex-col gap-3">
+              <div key={inscripcion.idInscripcion} className="flex min-w-0 flex-col gap-3">
                 <EventoDbCard evento={evento} estatusInscripcion={inscripcion.estatus} />
 
                 <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -200,9 +200,9 @@ export default async function MisEventosPage() {
         </div>
 
         {eventosDisponibles.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {eventosDisponibles.map((evento) => (
-              <div key={evento.id} className="flex flex-col gap-3">
+              <div key={evento.id} className="flex min-w-0 flex-col gap-3">
                 <EventoDbCard evento={evento} />
                 <InscribirseButton
                   idEvento={evento.id}

@@ -132,6 +132,7 @@ export default function RegisterForm() {
       <h1 className="mt-1 text-2xl font-bold text-gray-900">Eventos UANL</h1>
       <p className="mt-2 text-sm leading-relaxed text-gray-600">
         Crea tu cuenta para inscribirte y consultar tus eventos.
+        Si eres estudiante de la UANL, utiliza tu correo institucional para registrarte.
       </p>
 
       <form
@@ -196,6 +197,7 @@ export default function RegisterForm() {
                 onChange={(event) => field.handleChange(event.target.value)}
                 aria-invalid={field.state.meta.errors.length > 0}
                 aria-describedby={field.state.meta.errors.length > 0 ? 'email-error' : undefined}
+                placeholder="nombre.apellido@uanl.edu.mx"
                 className={inputClassName}
               />
               {field.state.meta.errors.length > 0 ? (
@@ -362,7 +364,7 @@ export default function RegisterForm() {
             {(field) => (
               <div>
                 <label htmlFor="facultad" className="text-sm font-medium text-gray-800">
-                  Facultad
+                  Facultad (si eres de la UANL)
                 </label>
                 <select
                   id="facultad"
