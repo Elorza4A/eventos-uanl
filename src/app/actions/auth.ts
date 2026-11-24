@@ -123,11 +123,29 @@ export async function loginEquipo(
   return authenticate(state, formData, 'equipo');
 }
 
-export async function logout(): Promise<void> {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  await supabase.auth.signOut();
-  redirect('/');
+export async function logout(): Promise<{ error?: string }> {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+
+    if (error) {
+      console.error('[auth] No se pudo cerrar la sesión:', error.message);
+      return {
+        error: 'No fue posible cerrar la sesión. Intenta de nuevo.',
+      };
+    }
+  } catch (error) {
+    console.error(
+      '[auth] Error inesperado al cerrar la sesión:',
+      error instanceof Error ? error.message : error,
+    );
+    return {
+      error: 'No fue posible cerrar la sesión. Intenta de nuevo.',
+    };
+  }
+
+  redirect('/', 'replace');
 }
 
 export async function registerAsistente(
