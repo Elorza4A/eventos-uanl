@@ -1,4 +1,8 @@
+ 'use client';
+
+import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   formatEventDay,
   formatEventMonth,
@@ -93,6 +97,7 @@ function ModalityIcon({ modality }: { modality: EventItem['modality'] }) {
 }
 
 export default function EventCard({ event }: { event: EventItem }) {
+  const [imageFailed, setImageFailed] = useState(false);
   const remaining = getRemainingSpots(event);
   const isSoldOut = remaining === 0;
   const isLowAvailability = remaining > 0 && remaining / event.capacity <= 0.2;
@@ -110,10 +115,27 @@ export default function EventCard({ event }: { event: EventItem }) {
       : `${remaining} cupos disponibles`;
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-gray-200 bg-white shadow-sm transition duration-300 focus-within:ring-2 focus-within:ring-blue-500/60 focus-within:ring-offset-2 hover:-translate-y-1 hover:shadow-lg">
-      <div className={`relative h-56 bg-gradient-to-br ${event.gradient}`}>
+    <Link
+      href={`/eventos/${event.id}`}
+      aria-label={`Ver detalles de ${event.title}`}
+      className="group block h-full rounded-[1.4rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+    >
+      <article className="relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-gray-200 bg-white shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
+      <div className={`relative h-56 overflow-hidden bg-gradient-to-br ${event.gradient}`}>
+        {event.imageUrl && !imageFailed ? (
+          <Image
+            src={event.imageUrl}
+            alt=""
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImageFailed(true)}
+            className="object-cover transition duration-500 group-hover:scale-105"
+            aria-hidden="true"
+          />
+        ) : null}
         <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.28),transparent_55%)]"
+          className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-slate-950/10"
           aria-hidden="true"
         />
         <div className="relative flex h-11 items-center gap-3 bg-slate-950/75 px-3 text-white">
@@ -132,12 +154,7 @@ export default function EventCard({ event }: { event: EventItem }) {
 
         <div className="absolute inset-x-5 bottom-5 text-center text-white drop-shadow-md">
           <h3 className="line-clamp-2 text-base font-bold leading-tight sm:text-lg">
-            <Link
-              href={`/eventos/${event.id}`}
-              className="rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              {event.title}
-            </Link>
+            {event.title}
           </h3>
           <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold">
             <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/80">
@@ -182,6 +199,7 @@ export default function EventCard({ event }: { event: EventItem }) {
           </div>
         </div>
       </div>
-    </article>
+      </article>
+    </Link>
   );
 }

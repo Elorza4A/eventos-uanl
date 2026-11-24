@@ -53,7 +53,7 @@ export default function InscribirseButton({
   }
 
   return (
-    <div>
+    <div className="min-w-0 w-full">
       <button
         type="button"
         onClick={handleClick}

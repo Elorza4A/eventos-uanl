@@ -59,7 +59,7 @@ export default function LoginForm({
             autoComplete="email"
             required
             className={inputClassName}
-            placeholder="nombre@uanl.mx"
+            placeholder="nombre.apellido@uanl.edu.mx"
           />
         </div>
 
