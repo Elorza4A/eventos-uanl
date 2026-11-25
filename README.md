@@ -92,7 +92,7 @@ pnpm build
 
 ## Gallery
 
-Pictures of your project.
+![Carrusel de eventos en la pagina de inicio](pagina_inicio.gif)
 
 ## Credit/Acknowledgment
 
